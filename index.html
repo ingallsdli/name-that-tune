@@ -1,545 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Name That Tune</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #13131a;
-    --surface2: #1c1c27;
-    --border: rgba(255,255,255,0.08);
-    --accent: #f0e040;
-    --accent2: #e040a0;
-    --text: #f0efe8;
-    --muted: #7a7a8a;
-    --success: #40e08a;
-    --danger: #e04060;
-    --radius: 12px;
-  }
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hazel's Name That Tune</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #111827;
+        color: white;
+        text-align: center;
+        padding: 20px;
+      }
+      .card {
+        background: #1f2937;
+        padding: 20px;
+        border-radius: 12px;
+        max-width: 500px;
+        margin: auto;
+      }
+      input {
+        width: 90%;
+        padding: 10px;
+        border-radius: 8px;
+        border: none;
+        margin-top: 10px;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 10px;
+        border: none;
+        border-radius: 8px;
+        background: #10b981;
+        color: black;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #059669;
+      }
+      audio {
+        width: 100%;
+        margin: 15px 0;
+      }
+    </style>
+  </head>
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(240,224,64,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(224,64,160,0.06) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  #app { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 24px 16px 60px; }
-
-  /* ── Header ── */
-  .header { text-align: center; margin-bottom: 36px; padding-top: 16px; }
-  .header h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(52px, 12vw, 80px);
-    letter-spacing: 0.04em;
-    line-height: 1;
-    background: linear-gradient(135deg, var(--accent) 0%, #fff 50%, var(--accent2) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .header p { font-size: 14px; color: var(--muted); margin-top: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
-
-  /* ── Nav tabs ── */
-  .nav { display: flex; gap: 4px; background: var(--surface); border-radius: var(--radius); padding: 4px; margin-bottom: 24px; border: 1px solid var(--border); }
-  .nav-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all .2s; }
-  .nav-btn.active { background: var(--accent); color: #0a0a0f; }
-
-  /* ── Screen transitions ── */
-  .screen { display: none; animation: fadeIn .25s ease; }
-  .screen.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* ── Controls row ── */
-  .controls { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-  .pill-group { display: flex; gap: 4px; }
-  .pill { padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--muted); transition: all .2s; font-family: 'DM Sans', sans-serif; }
-  .pill:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
-  .pill.active { background: var(--accent); color: #0a0a0f; border-color: var(--accent); }
-  .pill.active-pink { background: var(--accent2); color: #fff; border-color: var(--accent2); }
-
-  /* ── Score strip ── */
-  .score-strip { display: flex; gap: 12px; margin-bottom: 20px; }
-  .score-box { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; text-align: center; }
-  .score-box .num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; line-height: 1; color: var(--accent); }
-  .score-box .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
-
-  /* ── Game card ── */
-  .game-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 24px; margin-bottom: 16px; }
-  .round-info { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; }
-
-  /* ── Player ── */
-  .player { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; background: var(--surface2); border-radius: var(--radius); padding: 14px; border: 1px solid var(--border); }
-  .play-btn { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--accent); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .2s; }
-  .play-btn:hover { background: var(--accent); }
-  .play-btn:hover .play-icon { border-left-color: #0a0a0f; }
-  .play-btn:hover .pause-bar { background: #0a0a0f; }
-  .play-icon { width: 0; height: 0; border-top: 9px solid transparent; border-bottom: 9px solid transparent; border-left: 16px solid var(--accent); margin-left: 4px; }
-  .pause-icon { display: flex; gap: 4px; }
-  .pause-bar { width: 4px; height: 16px; background: var(--accent); border-radius: 2px; }
-  .waveform-wrap { flex: 1; }
-  .progress-track { height: 4px; background: var(--border); border-radius: 2px; cursor: pointer; position: relative; margin-bottom: 6px; }
-  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width .25s linear; }
-  .time-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
-
-  /* ── Hint section ── */
-  .hint-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-  .hint-btn { padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--muted); transition: all .2s; font-family: 'DM Sans', sans-serif; }
-  .hint-btn:hover:not(:disabled) { border-color: var(--accent2); color: var(--accent2); }
-  .hint-btn:disabled { opacity: 0.4; cursor: default; }
-  .hint-text { background: rgba(224,64,160,0.1); border: 1px solid rgba(224,64,160,0.3); border-radius: var(--radius); padding: 12px 16px; font-size: 14px; color: #f0a0d0; margin-bottom: 16px; display: none; }
-
-  /* ── Choices ── */
-  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-  .choice-btn {
-    padding: 16px 14px; border-radius: var(--radius); border: 1px solid var(--border);
-    background: var(--surface2); color: var(--text); font-family: 'DM Sans', sans-serif;
-    font-size: 14px; font-weight: 500; cursor: pointer; transition: all .2s; text-align: left;
-    line-height: 1.3;
-  }
-  .choice-btn .choice-artist { font-size: 12px; color: var(--muted); font-weight: 400; display: block; margin-top: 3px; }
-  .choice-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-  .choice-btn.correct { background: rgba(64,224,138,0.15); border-color: var(--success); color: var(--success); }
-  .choice-btn.wrong { background: rgba(224,64,96,0.15); border-color: var(--danger); color: var(--danger); }
-  .choice-btn:disabled { cursor: default; }
-
-  /* ── Feedback ── */
-  .feedback { border-radius: var(--radius); padding: 14px 18px; font-size: 14px; font-weight: 500; margin-bottom: 14px; display: none; }
-  .feedback.show { display: block; }
-  .feedback.correct { background: rgba(64,224,138,0.12); border: 1px solid rgba(64,224,138,0.3); color: var(--success); }
-  .feedback.wrong { background: rgba(224,64,96,0.12); border: 1px solid rgba(224,64,96,0.3); color: var(--danger); }
-
-  /* ── Next btn ── */
-  .next-btn { width: 100%; padding: 14px; border-radius: var(--radius); border: 1px solid var(--accent); background: transparent; color: var(--accent); font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.1em; cursor: pointer; transition: all .2s; display: none; }
-  .next-btn:hover { background: var(--accent); color: #0a0a0f; }
-
-  /* ── Attempts dots ── */
-  .attempts-row { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; font-size: 13px; color: var(--muted); }
-  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); border: 1px solid var(--muted); }
-  .dot.used { background: var(--danger); border-color: var(--danger); }
-  .dot.correct { background: var(--success); border-color: var(--success); }
-
-  /* ── Leaderboard ── */
-  .lb-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
-  .lb-form h3 { font-size: 16px; font-weight: 500; margin-bottom: 12px; }
-  .lb-form input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; margin-bottom: 10px; }
-  .lb-form input:focus { outline: none; border-color: var(--accent); }
-  .lb-form button { width: 100%; padding: 11px; border-radius: 8px; border: none; background: var(--accent); color: #0a0a0f; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .2s; }
-  .lb-form button:hover { opacity: 0.85; }
-  .lb-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-  .lb-header { display: grid; grid-template-columns: 48px 1fr 80px 80px; padding: 12px 16px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); }
-  .lb-row { display: grid; grid-template-columns: 48px 1fr 80px 80px; padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 14px; align-items: center; transition: background .15s; }
-  .lb-row:last-child { border-bottom: none; }
-  .lb-row:hover { background: var(--surface2); }
-  .lb-row .rank { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--muted); }
-  .lb-row.gold .rank { color: var(--accent); }
-  .lb-row.silver .rank { color: #c0c0c0; }
-  .lb-row.bronze .rank { color: #cd7f32; }
-  .lb-row .score-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--accent); text-align: right; }
-  .lb-row .streak-val { font-size: 14px; color: var(--muted); text-align: right; }
-  .lb-empty { padding: 40px; text-align: center; color: var(--muted); font-size: 14px; }
-
-  .genre-badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
-
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
-  .listening { animation: pulse 1.2s ease-in-out infinite; color: var(--accent); }
-</style>
-</head>
-<body>
-<div id="app">
-  <div class="header">
+  <body>
     <h1>Name That Tune</h1>
-    <p>30 seconds. 4 choices. Can you guess it?</p>
-  </div>
 
-  <div class="nav">
-    <button class="nav-btn active" onclick="showScreen('game')">Play</button>
-    <button class="nav-btn" onclick="showScreen('leaderboard')">Leaderboard</button>
-  </div>
+    <div class="card">
+      <p>Round: <span id="round">1</span> | Score: <span id="score">0</span></p>
 
-  <!-- GAME SCREEN -->
-  <div class="screen active" id="screen-game">
-    <div class="controls">
-      <div class="pill-group" id="genre-pills">
-        <button class="pill active" onclick="setGenre('all',this)">All</button>
-        <button class="pill" onclick="setGenre('pop',this)">Pop</button>
-        <button class="pill" onclick="setGenre('rock',this)">Rock</button>
-        <button class="pill" onclick="setGenre('hiphop',this)">Hip-hop</button>
-        <button class="pill" onclick="setGenre('classics',this)">Classics</button>
-      </div>
-      <div class="pill-group" id="diff-pills">
-        <button class="pill active" onclick="setDiff('easy',this)">Easy</button>
-        <button class="pill" onclick="setDiff('medium',this)">Medium</button>
-        <button class="pill" onclick="setDiff('hard',this)">Hard</button>
-      </div>
+      <audio id="audio"></audio>
+      <button id="playBtn">Play Clip</button>
+
+      <input id="guessInput" placeholder="Guess the song title..." />
+
+      <div id="feedback" style="min-height:20px; margin-top:10px;"></div>
+
+      <button id="submitBtn">Submit Guess</button>
+      <button id="revealBtn">Reveal Answer</button>
+      <button id="nextBtn">Next Round</button>
     </div>
 
-    <div class="score-strip">
-      <div class="score-box"><div class="num" id="score-num">0</div><div class="lbl">Score</div></div>
-      <div class="score-box"><div class="num" id="streak-num">0</div><div class="lbl">Streak</div></div>
-      <div class="score-box"><div class="num" id="round-num">1</div><div class="lbl">Round</div></div>
-    </div>
+    <script>
+      const audio = document.getElementById("audio");
+      const playBtn = document.getElementById("playBtn");
+      const submitBtn = document.getElementById("submitBtn");
+      const revealBtn = document.getElementById("revealBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const guessInput = document.getElementById("guessInput");
+      const feedback = document.getElementById("feedback");
+      const roundEl = document.getElementById("round");
+      const scoreEl = document.getElementById("score");
 
-    <div class="game-card">
-      <div class="round-info" id="round-info">Listen and pick the correct song</div>
-      <div class="genre-badge" id="genre-badge">Pop</div>
+      let songs = [];
+      let currentSong = null;
+      let round = 1;
+      let score = 0;
 
-      <div class="player">
-        <button class="play-btn" id="play-btn" onclick="togglePlay()">
-          <div class="play-icon" id="play-icon-el"></div>
-        </button>
-        <div class="waveform-wrap">
-          <div class="progress-track" onclick="seekAudio(event)">
-            <div class="progress-fill" id="progress-fill"></div>
-          </div>
-          <div class="time-row">
-            <span id="time-current">0:00</span>
-            <span id="time-lbl" class="listening">Tap play to listen</span>
-          </div>
-        </div>
-      </div>
+      function normalize(str) {
+        return str.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+      }
 
-      <div class="hint-row" id="hint-row"></div>
-      <div class="hint-text" id="hint-text"></div>
+      async function loadSongs() {
+        const res = await fetch("https://itunes.apple.com/search?term=disney&entity=song&limit=25");
+        const data = await res.json();
 
-      <div class="attempts-row" id="attempts-row"></div>
+        songs = data.results
+          .filter(s => s.previewUrl)
+          .map(s => ({
+            title: s.trackName,
+            artist: s.artistName,
+            audioClip: s.previewUrl
+          }));
 
-      <div class="choices" id="choices"></div>
+        pickSong();
+      }
 
-      <div class="feedback" id="feedback"></div>
-      <button class="next-btn" id="next-btn" onclick="nextSong()">Next Song →</button>
-    </div>
-  </div>
+      function pickSong() {
+        if (!songs.length) return;
 
-  <!-- LEADERBOARD SCREEN -->
-  <div class="screen" id="screen-leaderboard">
-    <div class="lb-form" id="lb-form" style="display:none">
-      <h3>Submit your score</h3>
-      <input type="text" id="lb-name" placeholder="Your name" maxlength="20">
-      <button onclick="submitScore()">Save to leaderboard</button>
-    </div>
-    <div class="lb-table" id="lb-table">
-      <div class="lb-header">
-        <span>#</span><span>Player</span><span style="text-align:right">Score</span><span style="text-align:right">Streak</span>
-      </div>
-      <div id="lb-rows"></div>
-    </div>
-  </div>
-</div>
+        currentSong = songs[Math.floor(Math.random() * songs.length)];
+        audio.src = currentSong.audioClip;
+        audio.load();
 
-<script>
-const SONGS = [
-  { title:"Blinding Lights", artist:"The Weeknd", genre:"pop", preview:"https://p.scdn.co/mp3-preview/2f37da1d4221f40b9d1a98cd191f4d6f1646ad17", hints:["Released in 2019","Synthwave / 80s feel","From the album After Hours","Spent 57 weeks in the Billboard top 10"] },
-  { title:"Anti-Hero", artist:"Taylor Swift", genre:"pop", preview:"https://p.scdn.co/mp3-preview/7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c", hints:["Released in 2022","Lead single from Midnights","Spent 8 weeks at #1","She says she's the problem"] },
-  { title:"As It Was", artist:"Harry Styles", genre:"pop", preview:"https://p.scdn.co/mp3-preview/3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d", hints:["Released in 2022","Synth-pop with melancholy feel","Features a child speaking at the start","From Harry's House"] },
-  { title:"Flowers", artist:"Miley Cyrus", genre:"pop", preview:"https://p.scdn.co/mp3-preview/9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e", hints:["Released January 2023","Empowerment anthem","Response to a Bruno Mars song","She can buy herself flowers"] },
-  { title:"Bohemian Rhapsody", artist:"Queen", genre:"rock", preview:"https://p.scdn.co/mp3-preview/4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f", hints:["Released in 1975","Nearly 6 minutes long","Has an operatic section","Written by Freddie Mercury"] },
-  { title:"Smells Like Teen Spirit", artist:"Nirvana", genre:"rock", preview:"https://p.scdn.co/mp3-preview/5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a", hints:["Released in 1991","Defined the grunge era","From the album Nevermind","Kurt Cobain on lead vocals"] },
-  { title:"Hotel California", artist:"Eagles", genre:"rock", preview:"https://p.scdn.co/mp3-preview/6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b", hints:["Released in 1977","Famous twin-guitar outro","You can check out but never leave","From the album of the same name"] },
-  { title:"Mr. Brightside", artist:"The Killers", genre:"rock", preview:"https://p.scdn.co/mp3-preview/7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c", hints:["Released in 2003","Opening riff is instantly recognizable","Never left the UK charts","About jealousy"] },
-  { title:"HUMBLE.", artist:"Kendrick Lamar", genre:"hiphop", preview:"https://p.scdn.co/mp3-preview/8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d", hints:["Released in 2017","Won a Grammy for Best Rap Song","Produced by Mike WiLL Made-It","From the album DAMN."] },
-  { title:"God's Plan", artist:"Drake", genre:"hiphop", preview:"https://p.scdn.co/mp3-preview/9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e", hints:["Released in 2018","Spent 11 weeks at #1","Music video gave away $1 million","From the album Scorpion"] },
-  { title:"Sicko Mode", artist:"Travis Scott", genre:"hiphop", preview:"https://p.scdn.co/mp3-preview/0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f", hints:["Released in 2018","Features Drake","Has 3 distinct beat switches","From the album Astroworld"] },
-  { title:"Lose Yourself", artist:"Eminem", genre:"hiphop", preview:"https://p.scdn.co/mp3-preview/1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a", hints:["Released in 2002","From the 8 Mile soundtrack","Won an Academy Award","One shot, one opportunity"] },
-  { title:"Imagine", artist:"John Lennon", genre:"classics", preview:"https://p.scdn.co/mp3-preview/2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b", hints:["Released in 1971","Piano-driven peace anthem","Former member of The Beatles","Imagine all the people..."] },
-  { title:"Superstition", artist:"Stevie Wonder", genre:"classics", preview:"https://p.scdn.co/mp3-preview/3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c", hints:["Released in 1972","Iconic clavinet riff","Originally written for Jeff Beck","Won 3 Grammy Awards"] },
-  { title:"What's Going On", artist:"Marvin Gaye", genre:"classics", preview:"https://p.scdn.co/mp3-preview/4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d", hints:["Released in 1971","Protest / soul classic","Motown Records","Named greatest song of all time by Rolling Stone in 2021"] },
-  { title:"Respect", artist:"Aretha Franklin", genre:"classics", preview:"https://p.scdn.co/mp3-preview/5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e", hints:["Released in 1967","Originally by Otis Redding","R-E-S-P-E-C-T","The Queen of Soul"] },
-];
+        feedback.textContent = "";
+        guessInput.value = "";
+      }
 
-let genre = 'all', diff = 'easy', round = 1, score = 0, streak = 0, bestStreak = 0;
-let currentSong = null, audio = null, playing = false;
-let hintsUsed = 0, attemptsLeft = 3, roundDone = false;
-let pendingScore = null;
-const maxAttempts = { easy: 3, medium: 2, hard: 1 };
-const hintCost = { easy: 5, medium: 10, hard: 0 };
-const pointsForCorrect = { easy: 50, medium: 100, hard: 200 };
+      playBtn.onclick = () => {
+        audio.currentTime = 0;
+        audio.play().catch(err => console.error("Play failed:", err));
+      };
 
-function filtered() {
-  return genre === 'all' ? SONGS : SONGS.filter(s => s.genre === genre);
-}
+      submitBtn.onclick = () => {
+        const guess = normalize(guessInput.value);
+        const correct = normalize(currentSong.title);
 
-function pickSong() {
-  const pool = filtered();
-  return pool[Math.floor(Math.random() * pool.length)];
-}
+        if (guess && (guess === correct || correct.includes(guess))) {
+          feedback.textContent = "Correct!";
+          score++;
+          scoreEl.textContent = score;
+        } else {
+          feedback.textContent = "Incorrect!";
+        }
+      };
 
-function shuffleArray(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+      revealBtn.onclick = () => {
+        feedback.textContent = `Answer: ${currentSong.title} by ${currentSong.artist}`;
+      };
 
-function buildChoices(correct) {
-  const pool = filtered().filter(s => s.title !== correct.title);
-  const wrong = shuffleArray(pool).slice(0, 3);
-  return shuffleArray([correct, ...wrong]);
-}
+      nextBtn.onclick = () => {
+        round++;
+        roundEl.textContent = round;
+        pickSong();
+      };
 
-function setGenre(g, el) {
-  genre = g;
-  document.querySelectorAll('#genre-pills .pill').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-  loadSong();
-}
-
-function setDiff(d, el) {
-  diff = d;
-  document.querySelectorAll('#diff-pills .pill').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-  loadSong();
-}
-
-function loadSong() {
-  if (audio) { audio.pause(); audio = null; }
-  playing = false;
-  updatePlayBtn();
-  document.getElementById('progress-fill').style.width = '0%';
-  document.getElementById('time-current').textContent = '0:00';
-  document.getElementById('time-lbl').textContent = 'Tap play to listen';
-  document.getElementById('time-lbl').className = 'listening';
-
-  currentSong = pickSong();
-  hintsUsed = 0;
-  attemptsLeft = maxAttempts[diff];
-  roundDone = false;
-
-  document.getElementById('genre-badge').textContent = currentSong.genre.charAt(0).toUpperCase() + currentSong.genre.slice(1);
-  document.getElementById('round-info').textContent = `Round ${round} · Listen and pick the correct song`;
-  document.getElementById('feedback').className = 'feedback';
-  document.getElementById('next-btn').style.display = 'none';
-  document.getElementById('hint-text').style.display = 'none';
-  document.getElementById('round-num').textContent = round;
-
-  renderHints();
-  renderAttempts();
-  renderChoices();
-
-  audio = new Audio(currentSong.preview);
-  audio.crossOrigin = 'anonymous';
-  audio.addEventListener('timeupdate', () => {
-    if (!audio.duration) return;
-    const pct = (audio.currentTime / audio.duration) * 100;
-    document.getElementById('progress-fill').style.width = pct + '%';
-    const s = Math.floor(audio.currentTime);
-    document.getElementById('time-current').textContent = Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + s % 60;
-  });
-  audio.addEventListener('ended', () => { playing = false; updatePlayBtn(); document.getElementById('time-lbl').textContent = 'Replay'; });
-  audio.addEventListener('error', () => { document.getElementById('time-lbl').textContent = 'Preview unavailable'; document.getElementById('time-lbl').className = ''; });
-
-  if (diff === 'easy') {
-    audio.play().then(() => { playing = true; updatePlayBtn(); document.getElementById('time-lbl').textContent = 'Now playing...'; document.getElementById('time-lbl').className = ''; }).catch(() => {});
-  }
-}
-
-function togglePlay() {
-  if (!audio) return;
-  if (playing) {
-    audio.pause(); playing = false;
-    document.getElementById('time-lbl').textContent = 'Paused';
-    document.getElementById('time-lbl').className = '';
-  } else {
-    audio.play().catch(() => {});
-    playing = true;
-    document.getElementById('time-lbl').textContent = 'Now playing...';
-    document.getElementById('time-lbl').className = '';
-  }
-  updatePlayBtn();
-}
-
-function seekAudio(e) {
-  if (!audio || !audio.duration) return;
-  const rect = e.currentTarget.getBoundingClientRect();
-  audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
-}
-
-function updatePlayBtn() {
-  const btn = document.getElementById('play-btn');
-  if (playing) {
-    btn.innerHTML = '<div class="pause-icon"><div class="pause-bar"></div><div class="pause-bar"></div></div>';
-  } else {
-    btn.innerHTML = '<div class="play-icon" id="play-icon-el"></div>';
-  }
-}
-
-function renderHints() {
-  const row = document.getElementById('hint-row');
-  if (diff === 'hard') { row.innerHTML = '<span style="font-size:13px;color:var(--muted)">No hints on hard mode</span>'; return; }
-  const max = diff === 'easy' ? 4 : 2;
-  let html = '';
-  for (let i = 0; i < max; i++) {
-    const used = i < hintsUsed;
-    const cost = hintCost[diff];
-    html += `<button class="hint-btn" onclick="revealHint(${i})" ${used || roundDone ? 'disabled' : ''}>
-      ${used ? 'Hint ' + (i + 1) + ' used' : 'Hint ' + (i + 1) + (cost ? ' (-' + cost + 'pt)' : '')}
-    </button>`;
-  }
-  row.innerHTML = html;
-}
-
-function revealHint(i) {
-  if (roundDone) return;
-  hintsUsed = i + 1;
-  const el = document.getElementById('hint-text');
-  el.style.display = 'block';
-  el.textContent = 'Hint ' + hintsUsed + ': ' + currentSong.hints[i];
-  score = Math.max(0, score - hintCost[diff]);
-  document.getElementById('score-num').textContent = score;
-  renderHints();
-}
-
-function renderAttempts() {
-  const max = maxAttempts[diff];
-  let html = '<span>Attempts:</span>';
-  for (let i = 0; i < max; i++) {
-    const cls = i < (max - attemptsLeft) ? 'dot used' : 'dot';
-    html += `<span class="${cls}"></span>`;
-  }
-  document.getElementById('attempts-row').innerHTML = html;
-}
-
-function renderChoices() {
-  const choices = buildChoices(currentSong);
-  let html = '';
-  choices.forEach((song, i) => {
-    html += `<button class="choice-btn" id="choice-${i}" onclick="pickChoice(${i}, ${song.title === currentSong.title})">
-      ${song.title}
-      <span class="choice-artist">${song.artist}</span>
-    </button>`;
-  });
-  document.getElementById('choices').innerHTML = html;
-}
-
-function pickChoice(idx, isCorrect) {
-  if (roundDone) return;
-  const btn = document.getElementById('choice-' + idx);
-
-  if (isCorrect) {
-    btn.classList.add('correct');
-    const base = pointsForCorrect[diff];
-    const bonus = Math.max(0, (attemptsLeft - 1) * 15);
-    score += base + bonus;
-    streak++;
-    bestStreak = Math.max(bestStreak, streak);
-    document.getElementById('score-num').textContent = score;
-    document.getElementById('streak-num').textContent = streak;
-    showFeedback('correct', 'Correct! +' + (base + bonus) + ' points' + (bonus ? ' (streak bonus!)' : ''));
-    endRound();
-  } else {
-    btn.classList.add('wrong');
-    btn.disabled = true;
-    attemptsLeft--;
-    renderAttempts();
-    if (attemptsLeft <= 0) {
-      revealCorrectAndEnd();
-    } else {
-      showFeedback('wrong', 'Not quite! ' + attemptsLeft + ' attempt' + (attemptsLeft > 1 ? 's' : '') + ' left.');
-      setTimeout(() => { document.getElementById('feedback').className = 'feedback'; }, 2000);
-    }
-  }
-}
-
-function revealCorrectAndEnd() {
-  streak = 0;
-  document.getElementById('streak-num').textContent = 0;
-  document.querySelectorAll('.choice-btn').forEach(btn => {
-    if (btn.textContent.trim().startsWith(currentSong.title)) btn.classList.add('correct');
-  });
-  showFeedback('wrong', 'The answer was "' + currentSong.title + '" by ' + currentSong.artist);
-  endRound();
-}
-
-function showFeedback(type, msg) {
-  const el = document.getElementById('feedback');
-  el.className = 'feedback show ' + type;
-  el.textContent = msg;
-}
-
-function endRound() {
-  roundDone = true;
-  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
-  document.getElementById('next-btn').style.display = 'block';
-  if (audio) { audio.pause(); playing = false; updatePlayBtn(); }
-  renderHints();
-  pendingScore = { score, streak: bestStreak };
-}
-
-function nextSong() {
-  round++;
-  loadSong();
-}
-
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
-  event.target.classList.add('active');
-  if (name === 'leaderboard') renderLeaderboard();
-}
-
-function getLeaderboard() {
-  try { return JSON.parse(localStorage.getItem('ntt_leaderboard') || '[]'); } catch { return []; }
-}
-
-function saveLeaderboard(data) {
-  localStorage.setItem('ntt_leaderboard', JSON.stringify(data));
-}
-
-function submitScore() {
-  const name = document.getElementById('lb-name').value.trim();
-  if (!name || !pendingScore) return;
-  const lb = getLeaderboard();
-  lb.push({ name, score: pendingScore.score, streak: pendingScore.streak, date: new Date().toLocaleDateString() });
-  lb.sort((a, b) => b.score - a.score);
-  saveLeaderboard(lb.slice(0, 20));
-  pendingScore = null;
-  document.getElementById('lb-form').style.display = 'none';
-  renderLeaderboard();
-}
-
-function renderLeaderboard() {
-  const lb = getLeaderboard();
-  const medals = ['gold', 'silver', 'bronze'];
-  if (pendingScore && pendingScore.score > 0) {
-    document.getElementById('lb-form').style.display = 'block';
-  }
-  const rowsEl = document.getElementById('lb-rows');
-  if (!lb.length) {
-    rowsEl.innerHTML = '<div class="lb-empty">No scores yet. Play a round and submit your score!</div>';
-    return;
-  }
-  rowsEl.innerHTML = lb.map((entry, i) => `
-    <div class="lb-row ${medals[i] || ''}">
-      <span class="rank">${i + 1}</span>
-      <span>${entry.name}<br><span style="font-size:11px;color:var(--muted)">${entry.date}</span></span>
-      <span class="score-val">${entry.score}</span>
-      <span class="streak-val">${entry.streak}x</span>
-    </div>
-  `).join('');
-}
-
-loadSong();
-</script>
-</body>
+      // Start app
+      loadSongs();
+    </script>
+  </body>
 </html>
