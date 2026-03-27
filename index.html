@@ -1,208 +1,764 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Hazel's Name That Tune</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #111827;
-  color: white;
-  text-align: center;
-  padding: 20px;
-}
-.card {
-  background: #1f2937;
-  padding: 20px;
-  border-radius: 12px;
-  max-width: 500px;
-  margin: auto;
-}
-select {
-  width: 45%;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  margin-top: 10px;
-  font-size: 14px;
-}
-button {
-  padding: 10px 20px;
-  margin: 10px;
-  border: none;
-  border-radius: 8px;
-  background: #10b981;
-  color: black;
-  font-weight: bold;
-  cursor: pointer;
-}
-button:hover {
-  background: #059669;
-}
-.options button {
-  width: 80%;
-  margin: 5px auto;
-  display: block;
-}
-audio {
-  width: 100%;
-  margin: 15px 0;
-}
+  /* Reset */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #121212;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  h1 {
+    font-weight: 900;
+    font-size: 3.5rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 0;
+    user-select: none;
+  }
+  h1 span {
+    display: inline-block;
+  }
+  .yellow { color: #f5de3a; }
+  .white { color: #fff; }
+  .pink { color: #e696be; }
+  p.subtitle {
+    margin: 0 0 30px 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: #888;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    background: #212121;
+    border-radius: 12px;
+    width: 400px;
+    margin-bottom: 20px;
+    user-select: none;
+  }
+  .tab {
+    flex: 1;
+    padding: 12px 0;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 600;
+    color: #bbb;
+    border-radius: 12px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  .tab.active {
+    background: #f5de3a;
+    color: black;
+  }
+
+  /* Filters */
+  .filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 700px;
+  }
+  .filter-btn {
+    padding: 7px 14px;
+    border-radius: 30px;
+    background: #212121;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  .filter-btn.active {
+    background: #f5de3a;
+    color: black;
+  }
+  .filter-btn:hover {
+    background: #f5de3a;
+    color: black;
+  }
+
+  /* Stats */
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    max-width: 600px;
+  }
+  .stat-card {
+    background: #212121;
+    border-radius: 12px;
+    padding: 20px 25px;
+    flex: 1 1 120px;
+    text-align: center;
+    user-select: none;
+  }
+  .stat-card .number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f5de3a;
+    margin-bottom: 5px;
+  }
+  .stat-card .label {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: #999;
+  }
+
+  /* Game container */
+  .game-container {
+    max-width: 700px;
+    width: 100%;
+    background: #212121;
+    border-radius: 12px;
+    padding: 25px;
+    user-select: none;
+  }
+  .round-info {
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    color: #888;
+  }
+  .genre-label {
+    background: #333;
+    padding: 4px 9px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 15px;
+    user-select: none;
+  }
+
+  /* Audio player */
+  .audio-player {
+    background: #292929;
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+  }
+  .play-pause-btn {
+    background: none;
+    border: 2.5px solid #f5de3a;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    color: #f5de3a;
+    cursor: pointer;
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .play-pause-btn:hover {
+    background: #f5de3a;
+    color: black;
+  }
+  .play-pause-btn:focus {
+    outline: none;
+  }
+  .play-icon {
+    border-style: solid;
+    border-width: 10px 0 10px 18px;
+    border-color: transparent transparent transparent #f5de3a;
+    margin-left: 3px;
+  }
+  .pause-icon {
+    width: 16px;
+    height: 18px;
+    position: relative;
+  }
+  .pause-icon::before,
+  .pause-icon::after {
+    content: "";
+    position: absolute;
+    background: #f5de3a;
+    width: 5px;
+    height: 100%;
+    top: 0;
+  }
+  .pause-icon::before {
+    left: 0;
+  }
+  .pause-icon::after {
+    right: 0;
+  }
+  .time-display {
+    flex-grow: 1;
+    color: #ccc;
+    font-size: 0.85rem;
+  }
+  .status-text {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-left: 15px;
+    user-select: none;
+    min-width: 110px;
+    text-align: right;
+  }
+
+  /* Hints */
+  .hints {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .hint-btn {
+    background: #292929;
+    border-radius: 20px;
+    border: 1.5px solid #444;
+    padding: 7px 14px;
+    color: #ccc;
+    font-size: 0.8rem;
+    cursor: pointer;
+    flex: 1 1 48%;
+    max-width: 140px;
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  .hint-btn:hover:not(:disabled) {
+    background: #f5de3a;
+    color: black;
+    border-color: #f5de3a;
+  }
+  .hint-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  /* Attempts */
+  .attempts {
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: #ccc;
+    user-select: none;
+  }
+  .attempts span {
+    display: inline-block;
+    margin-right: 8px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #555;
+    vertical-align: middle;
+  }
+  .attempts span.correct {
+    background: #f5de3a;
+    border-color: #f5de3a;
+  }
+  .attempts span.incorrect {
+    background: #e04c4c;
+    border-color: #e04c4c;
+  }
+
+  /* Answer buttons */
+  .answer-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .answer-btn {
+    background: #292929;
+    border-radius: 12px;
+    padding: 15px 10px;
+    color: #eee;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: background-color 0.25s, border-color 0.25s;
+  }
+  .answer-btn:hover:not(:disabled) {
+    background: #f5de3a;
+    color: black;
+    border-color: #f5de3a;
+  }
+  .answer-btn:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+  .answer-artist {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #bbb;
+    margin-top: 5px;
+  }
 </style>
 </head>
 <body>
 
-<h1>Hazel's Name That Tune</h1>
+<h1><span class="yellow">NAME</span> <span class="white">THAT</span> <span class="pink">TUNE</span></h1>
+<p class="subtitle">30 SECONDS. 4 CHOICES. CAN YOU GUESS IT?</p>
 
-<div class="card">
-  <p>Round: <span id="round">1</span> | Score: <span id="score">0</span></p>
+<div class="tabs" role="tablist">
+  <button class="tab active" id="tab-play" role="tab" aria-selected="true" tabindex="0">Play</button>
+  <button class="tab" id="tab-leaderboard" role="tab" aria-selected="false" tabindex="-1">Leaderboard</button>
+</div>
 
-  <div>
-    <select id="genreSelect">
-      <option value="all">Genre: All</option>
-      <option value="pop">Pop</option>
-      <option value="rock">Rock</option>
-      <option value="hiphop">Hip-Hop</option>
-    </select>
-    <select id="difficultySelect">
-      <option value="all">Difficulty: All</option>
-      <option value="easy">Easy</option>
-      <option value="medium">Medium</option>
-      <option value="hard">Hard</option>
-    </select>
+<div class="filters" role="group" aria-label="Genre filters">
+  <button class="filter-btn active" data-filter-type="genre" data-filter-value="all">All</button>
+  <button class="filter-btn" data-filter-type="genre" data-filter-value="pop">Pop</button>
+  <button class="filter-btn" data-filter-type="genre" data-filter-value="rock">Rock</button>
+  <button class="filter-btn" data-filter-type="genre" data-filter-value="hiphop">Hip-hop</button>
+  <button class="filter-btn" data-filter-type="genre" data-filter-value="classics">Classics</button>
+</div>
+
+<div class="filters" role="group" aria-label="Difficulty filters" style="margin-bottom: 30px;">
+  <button class="filter-btn active" data-filter-type="difficulty" data-filter-value="easy">Easy</button>
+  <button class="filter-btn" data-filter-type="difficulty" data-filter-value="medium">Medium</button>
+  <button class="filter-btn" data-filter-type="difficulty" data-filter-value="hard">Hard</button>
+</div>
+
+<div class="stats" aria-live="polite" aria-atomic="true">
+  <div class="stat-card">
+    <div class="number" id="score">0</div>
+    <div class="label">SCORE</div>
+  </div>
+  <div class="stat-card">
+    <div class="number" id="streak">0</div>
+    <div class="label">STREAK</div>
+  </div>
+  <div class="stat-card">
+    <div class="number" id="round">1</div>
+    <div class="label">ROUND</div>
+  </div>
+</div>
+
+<div class="game-container" role="main" aria-live="polite" aria-atomic="true" aria-label="Game section">
+  <div class="round-info" id="roundInfo">ROUND 1 · LISTEN AND PICK THE CORRECT SONG</div>
+  <div class="genre-label" id="genreLabel">POP</div>
+
+  <div class="audio-player">
+    <button class="play-pause-btn" id="playPauseBtn" aria-label="Play or pause song preview" aria-pressed="false" type="button">
+      <div class="play-icon"></div>
+    </button>
+    <div class="time-display" id="timeDisplay">0:00</div>
+    <div class="status-text" id="statusText">Paused</div>
+  </div>
+  <audio id="audio" preload="auto"></audio>
+
+  <div class="hints" aria-label="Hints">
+    <button class="hint-btn" id="hint1">Hint 1 (−5pt)</button>
+    <button class="hint-btn" id="hint2">Hint 2 (−5pt)</button>
+    <button class="hint-btn" id="hint3">Hint 3 (−5pt)</button>
+    <button class="hint-btn" id="hint4">Hint 4 (−5pt)</button>
   </div>
 
-  <audio id="audio"></audio>
-  <button id="playBtn">Play Clip</button>
-
-  <div class="options">
-    <button id="opt1"></button>
-    <button id="opt2"></button>
-    <button id="opt3"></button>
-    <button id="opt4"></button>
+  <div class="attempts" id="attempts">
+    Attempts: <span class="attempt-circle"></span><span class="attempt-circle"></span><span class="attempt-circle"></span>
   </div>
 
-  <p>Hints used: <span id="hints">0</span></p>
-  <button id="hintBtn">Use Hint (‑1 point)</button>
-
-  <div id="feedback" style="min-height:20px; margin-top:10px;"></div>
-
-  <button id="nextBtn">Next Round</button>
+  <div class="answer-buttons" role="group" aria-label="Answer choices">
+    <button class="answer-btn" id="answer0" type="button"></button>
+    <button class="answer-btn" id="answer1" type="button"></button>
+    <button class="answer-btn" id="answer2" type="button"></button>
+    <button class="answer-btn" id="answer3" type="button"></button>
+  </div>
 </div>
 
 <script>
-const allSongs = [
-  { title: "Blinding Lights", artist: "The Weeknd", genre: "pop", difficulty: "easy", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/50/d6/ee/50d6eeb4-0af7-1a70-d3ee-51df47a6f446/mzaf_16214862828323476941.plus.aac.p.m4a" },
-  { title: "Shape of You", artist: "Ed Sheeran", genre: "pop", difficulty: "easy", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/32/4b/1d/324b1d8d-5707-70e1-c590-bb7d47b22467/mzaf_5251729111877021742.plus.aac.p.m4a" },
-  { title: "Uptown Funk", artist: "Mark Ronson ft. Bruno Mars", genre: "pop", difficulty: "medium", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/61/34/00/613400d6-cf5a-68df-27c0-c785310a6f36/mzaf_379982013525619605.plus.aac.p.m4a" },
-  { title: "Roar", artist: "Katy Perry", genre: "pop", difficulty: "medium", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/fb/b3/bb/fbb3bbd1-c6bc-cd1d-0e1d-970a5a84d395/mzaf_4322224648509566873.plus.aac.p.m4a" },
-  { title: "Bad Romance", artist: "Lady Gaga", genre: "pop", difficulty: "hard", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/7a/2f/23/7a2f2389-7db9-9ce4-3e7b-5c6e98acdc90/mzaf_14242243601795023230.plus.aac.p.m4a" },
-  { title: "Happy", artist: "Pharrell Williams", genre: "pop", difficulty: "easy", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/59/ba/3d/59ba3d15-4b82-7fef-f82f-68f3c46d59f1/mzaf_2936571057473210779.plus.aac.p.m4a" },
-  { title: "Call Me Maybe", artist: "Carly Rae Jepsen", genre: "pop", difficulty: "easy", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/63/30/4a/63304a44-2d01-b148-25e7-22b55a1b7a40/mzaf_14555977189435815924.plus.aac.p.m4a" },
-  { title: "Firework", artist: "Katy Perry", genre: "pop", difficulty: "medium", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/2c/b3/f6/2cb3f6be-3c4e-f538-cbb5-d77b77b8aa7f/mzaf_1363293739365032309.plus.aac.p.m4a" },
-  { title: "Sorry", artist: "Justin Bieber", genre: "pop", difficulty: "medium", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/33/f4/51/33f4512b-3980-59e4-3eec-62d8b909d8e5/mzaf_4931393900109616057.plus.aac.p.m4a" },
-  { title: "Rolling in the Deep", artist: "Adele", genre: "pop", difficulty: "hard", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/d9/38/37/d93837a9-6e60-49f7-4f1e-fc8bc20b5fc0/mzaf_12643647380546646014.plus.aac.p.m4a" },
-  { title: "Smells Like Teen Spirit", artist: "Nirvana", genre: "rock", difficulty: "hard", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/47/d7/2e/47d72eb7-94ee-e158-5e02-1a6ff435a61b/mzaf_3622966118199118940.plus.aac.p.m4a" },
-  { title: "Bohemian Rhapsody", artist: "Queen", genre: "rock", difficulty: "hard", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/56/f6/fb/56f6fbf9-0bc5-0989-91e9-5b789836a80a/mzaf_17727190927284909625.plus.aac.p.m4a" },
-  { title: "Sweet Child O' Mine", artist: "Guns N' Roses", genre: "rock", difficulty: "medium", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/4c/42/23/4c42237c-b9af-9924-7c89-39dbad138a59/mzaf_13249896199221796462.plus.aac.p.m4a" },
-  { title: "Eye of the Tiger", artist: "Survivor", genre: "rock", difficulty: "easy", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/c8/d1/f3/c8d1f3b3-d0eb-8ad3-8c5e-8b7e1b7da0bc/mzaf_6020634460681036540.plus.aac.p.m4a" },
-  { title: "Back In Black", artist: "AC/DC", genre: "rock", difficulty: "medium", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/1e/17/9f/1e179f3d-e3d9-6208-3255-2d95ec56a986/mzaf_4408956519195723262.plus.aac.p.m4a" },
-  { title: "Lose Yourself", artist: "Eminem", genre: "hiphop", difficulty: "hard", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/8f/7b/3d/8f7b3d97-5c1f-9673-4b69-123cb1f7dcf5/mzaf_7632805747931113240.plus.aac.p.m4a" },
-  { title: "Sicko Mode", artist: "Travis Scott", genre: "hiphop", difficulty: "medium", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/3c/ff/5b/3cff5b23-fb33-2de1-3a71-01e5486b0e57/mzaf_1273372228706076785.plus.aac.p.m4a" },
-  { title: "God's Plan", artist: "Drake", genre: "hiphop", difficulty: "medium", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/b4/1e/16/b41e16d6-18c7-2c0a-2f30-7bff12f8e2b0/mzaf_11778254490306012416.plus.aac.p.m4a" },
-  { title: "Hotline Bling", artist: "Drake", genre: "hiphop", difficulty: "easy", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/91/54/10/915410c3-d7be-1c7f-1d45-3e39e84f30b2/mzaf_745261975671392262.plus.aac.p.m4a" },
-  { title: "In Da Club", artist: "50 Cent", genre: "hiphop", difficulty: "medium", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/25/65/d3/2565d3ec-d6a2-1f8d-8331-c0c72d8dfc3d/mzaf_3936945468690782279.plus.aac.p.m4a" },
-  { title: "Rockstar", artist: "Post Malone", genre: "hiphop", difficulty: "medium", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/f3/92/6c/f3926c83-c1aa-0c87-1981-d17332f0a2c8/mzaf_11524392517378039370.plus.aac.p.m4a" },
-  { title: "Thunderstruck", artist: "AC/DC", genre: "rock", difficulty: "hard", previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/f8/cc/fc/f8ccfc90-564f-98f5-f118-1c35d3796a85/mzaf_10123456789.plus.aac.p.m4a" }
-];
+(() => {
+  const songs = [
+    // POP
+    {title:"Blinding Lights", artist:"The Weeknd", genre:"pop", difficulty:"easy", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/50/d6/ee/50d6eeb4-0af7-1a70-d3ee-51df47a6f446/mzaf_16214862828323476941.plus.aac.p.m4a"},
+    {title:"Shape of You", artist:"Ed Sheeran", genre:"pop", difficulty:"easy", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/32/4b/1d/324b1d8d-5707-70e1-c590-bb7d47b22467/mzaf_5251729111877021742.plus.aac.p.m4a"},
+    {title:"Uptown Funk", artist:"Mark Ronson ft. Bruno Mars", genre:"pop", difficulty:"medium", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/61/34/00/613400d6-cf5a-68df-27c0-c785310a6f36/mzaf_379982013525619605.plus.aac.p.m4a"},
+    {title:"Roar", artist:"Katy Perry", genre:"pop", difficulty:"medium", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/fb/b3/bb/fbb3bbd1-c6bc-cd1d-0e1d-970a5a84d395/mzaf_4322224648509566873.plus.aac.p.m4a"},
+    {title:"Bad Romance", artist:"Lady Gaga", genre:"pop", difficulty:"hard", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/7a/2f/23/7a2f2389-7db9-9ce4-3e7b-5c6e98acdc90/mzaf_14242243601795023230.plus.aac.p.m4a"},
+    {title:"Happy", artist:"Pharrell Williams", genre:"pop", difficulty:"easy", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/59/ba/3d/59ba3d15-4b82-7fef-f82f-68f3c46d59f1/mzaf_2936571057473210779.plus.aac.p.m4a"},
+    {title:"Call Me Maybe", artist:"Carly Rae Jepsen", genre:"pop", difficulty:"easy", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/63/30/4a/63304a44-2d01-b148-25e7-22b55a1b7a40/mzaf_14555977189435815924.plus.aac.p.m4a"},
+    {title:"Firework", artist:"Katy Perry", genre:"pop", difficulty:"medium", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/2c/b3/f6/2cb3f6be-3c4e-f538-cbb5-d77b77b8aa7f/mzaf_1363293739365032309.plus.aac.p.m4a"},
+    {title:"Sorry", artist:"Justin Bieber", genre:"pop", difficulty:"medium", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/33/f4/51/33f4512b-3980-59e4-3eec-62d8b909d8e5/mzaf_4931393900109616057.plus.aac.p.m4a"},
+    {title:"Rolling in the Deep", artist:"Adele", genre:"pop", difficulty:"hard", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/ab/1a/0b/ab1a0b82-7b87-1754-1fc3-c57a234d6341/mzaf_7895228683536550927.plus.aac.p.m4a"},
 
-const audio = document.getElementById("audio");
-const playBtn = document.getElementById("playBtn");
-const nextBtn = document.getElementById("nextBtn");
-const hintBtn = document.getElementById("hintBtn");
-const genreSelect = document.getElementById("genreSelect");
-const difficultySelect = document.getElementById("difficultySelect");
-const feedback = document.getElementById("feedback");
-const roundEl = document.getElementById("round");
-const scoreEl = document.getElementById("score");
-const hintsEl = document.getElementById("hints");
-const optionBtns = [document.getElementById("opt1"),document.getElementById("opt2"),document.getElementById("opt3"),document.getElementById("opt4")];
+    // ROCK
+    {title:"Mr. Brightside", artist:"The Killers", genre:"rock", difficulty:"easy", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/9f/06/c1/9f06c14b-146e-3e44-7e3f-4f0e0530deed/mzaf_1222559913999312120.plus.aac.p.m4a"},
+    {title:"Hotel California", artist:"Eagles", genre:"rock", difficulty:"easy", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/1c/ce/21/1cce2102-10d9-f1b7-daa2-d209187c7880/mzaf_6770352042507170076.plus.aac.p.m4a"},
+    {title:"Bohemian Rhapsody", artist:"Queen", genre:"rock", difficulty:"medium", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/af/9c/21/af9c217d-5910-1f44-e7a1-1f7dbfe507a9/mzaf_17681313766894259893.plus.aac.p.m4a"},
+    {title:"Sweet Child O' Mine", artist:"Guns N' Roses", genre:"rock", difficulty:"medium", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/4e/30/fb/4e30fbf4-e83f-6b20-0d5b-f4d6dfeb5f70/mzaf_4874968370862550994.plus.aac.p.m4a"},
+    {title:"Back In Black", artist:"AC/DC", genre:"rock", difficulty:"hard", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/25/0a/84/250a84a0-bc7a-8de5-7eac-8660f8b51b5a/mzaf_11314189652357343682.plus.aac.p.m4a"},
+    {title:"Livin' On A Prayer", artist:"Bon Jovi", genre:"rock", difficulty:"hard", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/cc/67/ae/cc67ae3d-bb41-b691-99ae-3b7832dff71b/mzaf_2020730555219199423.plus.aac.p.m4a"},
+    {title:"Don't Stop Believin'", artist:"Journey", genre:"rock", difficulty:"medium", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/da/d2/8e/dad28eaa-f9d1-b3a5-b12c-0db9e2ef1ad8/mzaf_2340588035216910339.plus.aac.p.m4a"},
 
-let filteredSongs = [];
-let currentSong = null;
-let round = 1;
-let score = 0;
-let hintsUsed = 0;
+    // HIP-HOP
+    {title:"God's Plan", artist:"Drake", genre:"hiphop", difficulty:"easy", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/c7/64/c7/c764c7d1-e71b-4ef8-c6ab-ddebf9e2e7a1/mzaf_13091125813487901860.plus.aac.p.m4a"},
+    {title:"Sicko Mode", artist:"Travis Scott", genre:"hiphop", difficulty:"medium", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/51/f8/9d/51f89d63-5d4f-0b3e-214d-1a41f79a1f53/mzaf_1864146671678013539.plus.aac.p.m4a"},
+    {title:"HUMBLE.", artist:"Kendrick Lamar", genre:"hiphop", difficulty:"hard", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/46/1e/da/461eda50-f3a5-ced7-6bb4-cd21f8cdb14f/mzaf_12787199992027826770.plus.aac.p.m4a"},
 
-function normalize(str){return str.toLowerCase().replace(/[^a-z0-9 ]/g,"").trim();}
+    // CLASSICS
+    {title:"Imagine", artist:"John Lennon", genre:"classics", difficulty:"easy", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/d0/63/c1/d063c120-8c69-44a4-6ae5-b8215be2d3c6/mzaf_685337492373719393.plus.aac.p.m4a"},
+    {title:"Hey Jude", artist:"The Beatles", genre:"classics", difficulty:"medium", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/61/99/7f/61997f74-c87e-c68c-1b89-8c3c72b6e18f/mzaf_2643819832679755461.plus.aac.p.m4a"},
+    {title:"What a Wonderful World", artist:"Louis Armstrong", genre:"classics", difficulty:"medium", preview:"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/ba/72/31/ba72319e-111d-c47b-ec2d-889ca5b3a7b1/mzaf_1596521926516293647.plus.aac.p.m4a"},
+  ];
 
-function filterSongs(){
-  let genre = genreSelect.value;
-  let difficulty = difficultySelect.value;
-  filteredSongs = allSongs.filter(song => 
-    (genre==="all" || song.genre===genre) &&
-    (difficulty==="all" || song.difficulty===difficulty)
-  );
-  if(filteredSongs.length < 4){
-    feedback.textContent="Not enough songs for selected filters.";
-    currentSong=null;
-    optionBtns.forEach(b=>b.textContent="");
+  let filteredSongs = [];
+  let currentRound = 1;
+  let score = 0;
+  let streak = 0;
+  let currentSong = null;
+  let attempts = 0;
+  let maxAttempts = 3;
+  let hintUsedCount = 0;
+
+  // Current filters
+  let selectedGenre = "all";
+  let selectedDifficulty = "easy";
+
+  // DOM refs
+  const playPauseBtn = document.getElementById('playPauseBtn');
+  const audio = document.getElementById('audio');
+  const timeDisplay = document.getElementById('timeDisplay');
+  const statusText = document.getElementById('statusText');
+  const roundInfo = document.getElementById('roundInfo');
+  const genreLabel = document.getElementById('genreLabel');
+  const scoreEl = document.getElementById('score');
+  const streakEl = document.getElementById('streak');
+  const roundEl = document.getElementById('round');
+  const attemptsEl = document.getElementById('attempts');
+  const hintButtons = [...document.querySelectorAll('.hint-btn')];
+  const answerButtons = [
+    document.getElementById('answer0'),
+    document.getElementById('answer1'),
+    document.getElementById('answer2'),
+    document.getElementById('answer3')
+  ];
+  const filterButtons = [...document.querySelectorAll('.filter-btn')];
+  const tabs = [...document.querySelectorAll('.tab')];
+
+  // Shuffle helper
+  function shuffle(array) {
+    for(let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
   }
-}
 
-function pickSong(){
-  filterSongs();
-  if(filteredSongs.length < 4) return;
-  roundEl.textContent=round;
-  hintsUsed=0;
-  hintsEl.textContent=hintsUsed;
-  feedback.textContent="";
-  
-  const indices=[];
-  while(indices.length<4){
-    let idx=Math.floor(Math.random()*filteredSongs.length);
-    if(!indices.includes(idx)) indices.push(idx);
+  // Format seconds to M:SS
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s < 10 ? '0' + s : s}`;
   }
-  currentSong=filteredSongs[indices[0]];
-  const options=indices.map(i=>filteredSongs[i].title);
-  options.sort(()=>Math.random()-0.5);
-  optionBtns.forEach((btn,i)=>{
-    btn.textContent=options[i];
-    btn.disabled=false;
+
+  // Update attempts display circles
+  function updateAttemptsDisplay() {
+    const circles = attemptsEl.querySelectorAll('span');
+    circles.forEach((circle, idx) => {
+      circle.className = '';
+      if(idx < attempts) {
+        circle.classList.add('incorrect');
+      }
+    });
+  }
+
+  // Enable or disable answer buttons
+  function setAnswerButtonsDisabled(disabled) {
+    answerButtons.forEach(btn => btn.disabled = disabled);
+  }
+
+  // Enable or disable hint buttons
+  function setHintButtonsDisabled(disabled) {
+    hintButtons.forEach(btn => btn.disabled = disabled);
+  }
+
+  // Update stats displays
+  function updateStats() {
+    scoreEl.textContent = score;
+    streakEl.textContent = streak;
+    roundEl.textContent = currentRound;
+  }
+
+  // Pick a new song for the round
+  function pickNewSong() {
+    attempts = 0;
+    hintUsedCount = 0;
+    updateAttemptsDisplay();
+    setAnswerButtonsDisabled(false);
+    setHintButtonsDisabled(false);
+    statusText.textContent = "Paused";
+
+    // Filter songs by genre and difficulty
+    filteredSongs = songs.filter(s => {
+      return (selectedGenre === 'all' || s.genre === selectedGenre) && s.difficulty === selectedDifficulty;
+    });
+    if(filteredSongs.length === 0) {
+      // No songs available with current filters
+      genreLabel.textContent = selectedGenre.toUpperCase();
+      roundInfo.textContent = `No songs found for filters. Please change genre/difficulty.`;
+      answerButtons.forEach(b => {
+        b.textContent = "";
+        b.disabled = true;
+      });
+      audio.pause();
+      audio.src = "";
+      timeDisplay.textContent = "0:00";
+      return;
+    }
+    // Choose random song
+    currentSong = filteredSongs[Math.floor(Math.random() * filteredSongs.length)];
+
+    // Show round info
+    roundInfo.textContent = `ROUND ${currentRound} · LISTEN AND PICK THE CORRECT SONG`;
+    genreLabel.textContent = currentSong.genre.toUpperCase();
+
+    // Setup audio
+    audio.src = currentSong.preview;
+    audio.pause();
+    audio.currentTime = 0;
+
+    // Reset play button to play icon
+    setPlayPauseIcon(false);
+
+    // Setup answers (one correct + 3 random wrong)
+    const wrongAnswers = filteredSongs.filter(s => s.title !== currentSong.title);
+    shuffle(wrongAnswers);
+    const answerOptions = [currentSong, ...wrongAnswers.slice(0, 3)];
+    shuffle(answerOptions);
+
+    // Fill buttons
+    answerButtons.forEach((btn, i) => {
+      btn.disabled = false;
+      btn.dataset.title = answerOptions[i].title;
+      btn.dataset.artist = answerOptions[i].artist;
+      btn.textContent = answerOptions[i].title;
+      if (btn.querySelector('.answer-artist')) {
+        btn.querySelector('.answer-artist').textContent = answerOptions[i].artist;
+      } else {
+        const artistSpan = document.createElement('div');
+        artistSpan.className = 'answer-artist';
+        artistSpan.textContent = answerOptions[i].artist;
+        btn.appendChild(artistSpan);
+      }
+    });
+  }
+
+  // Play / Pause toggle
+  function togglePlayPause() {
+    if(audio.paused) {
+      audio.play();
+    } else {
+      audio.pause();
+    }
+  }
+
+  // Update play/pause button icon
+  function setPlayPauseIcon(isPlaying) {
+    playPauseBtn.setAttribute('aria-pressed', isPlaying ? 'true' : 'false');
+    playPauseBtn.innerHTML = '';
+    if(isPlaying) {
+      const pauseDiv = document.createElement('div');
+      pauseDiv.className = 'pause-icon';
+      playPauseBtn.appendChild(pauseDiv);
+      statusText.textContent = "Playing...";
+    } else {
+      const playDiv = document.createElement('div');
+      playDiv.className = 'play-icon';
+      playPauseBtn.appendChild(playDiv);
+      statusText.textContent = "Paused";
+    }
+  }
+
+  // Answer button clicked
+  function handleAnswerClick(e) {
+    if(attempts >= maxAttempts) return;
+    const btn = e.currentTarget;
+    const selectedTitle = btn.dataset.title;
+
+    if(selectedTitle === currentSong.title) {
+      // Correct answer
+      score += 10 - (hintUsedCount * 5);  // deduct 5 points per hint used
+      if(score < 0) score = 0;
+      streak++;
+      attempts = maxAttempts; // end attempts for round
+
+      // Mark button green and disable others
+      btn.style.backgroundColor = '#a0c97a';
+      btn.style.color = 'black';
+      setAnswerButtonsDisabled(true);
+      setHintButtonsDisabled(true);
+
+      // Show success in attempts
+      const circles = attemptsEl.querySelectorAll('span');
+      for(let i=0; i<maxAttempts; i++) {
+        circles[i].className = 'correct';
+      }
+
+      updateStats();
+      // Pause audio
+      audio.pause();
+      setPlayPauseIcon(false);
+
+      // Start next round after delay
+      setTimeout(() => {
+        currentRound++;
+        updateStats();
+        resetAnswerButtonsColors();
+        pickNewSong();
+      }, 2800);
+    } else {
+      // Wrong answer
+      attempts++;
+      streak = 0;
+      updateAttemptsDisplay();
+      updateStats();
+
+      // Mark button red & disable it
+      btn.style.backgroundColor = '#e04c4c';
+      btn.style.color = 'white';
+      btn.disabled = true;
+
+      if(attempts >= maxAttempts) {
+        // Show correct answer highlighted in green
+        answerButtons.forEach(b => {
+          if(b.dataset.title === currentSong.title) {
+            b.style.backgroundColor = '#a0c97a';
+            b.style.color = 'black';
+          }
+          b.disabled = true;
+        });
+
+        // Pause audio
+        audio.pause();
+        setPlayPauseIcon(false);
+
+        // Next round after delay
+        setTimeout(() => {
+          currentRound++;
+          updateStats();
+          resetAnswerButtonsColors();
+          pickNewSong();
+        }, 2800);
+      }
+    }
+  }
+
+  // Reset answer buttons colors
+  function resetAnswerButtonsColors() {
+    answerButtons.forEach(btn => {
+      btn.style.backgroundColor = '';
+      btn.style.color = '';
+    });
+  }
+
+  // Hint button clicked
+  function handleHintClick(e) {
+    if(hintUsedCount >= 4) return; // max 4 hints (one per button)
+    const btn = e.currentTarget;
+    if(btn.disabled) return;
+
+    hintUsedCount++;
+    score -= 5;
+    if(score < 0) score = 0;
+    updateStats();
+
+    // Disable this hint button
+    btn.disabled = true;
+
+    // Provide a hint: remove a wrong answer button
+    // Find an answer button that is wrong and still enabled
+    const enabledWrongButtons = answerButtons.filter(b => b.dataset.title !== currentSong.title && !b.disabled);
+    if(enabledWrongButtons.length > 0) {
+      const toRemove = enabledWrongButtons[0];
+      toRemove.disabled = true;
+      toRemove.style.backgroundColor = '#555';
+      toRemove.style.color = '#999';
+      toRemove.style.cursor = 'default';
+    }
+  }
+
+  // Audio event updates time display and play/pause icon sync
+  audio.addEventListener('timeupdate', () => {
+    timeDisplay.textContent = formatTime(audio.currentTime);
   });
-  audio.src=currentSong.previewUrl;
-}
+  audio.addEventListener('play', () => setPlayPauseIcon(true));
+  audio.addEventListener('pause', () => setPlayPauseIcon(false));
+  audio.addEventListener('ended', () => setPlayPauseIcon(false));
 
-playBtn.onclick=()=>{audio.currentTime=0;audio.play();};
-optionBtns.forEach(btn=>{
-  btn.onclick=()=>{
-    if(!currentSong) return;
-    const guess=normalize(btn.textContent);
-    const correct=normalize(currentSong.title);
-    if(guess===correct){
-      feedback.textContent="Correct!";
-      score+=Math.max(0,3-hintsUsed);
-      scoreEl.textContent=score;
-    } else {feedback.textContent="Incorrect!";}
-    optionBtns.forEach(b=>b.disabled=true);
-  }
-});
-hintBtn.onclick=()=>{
-  if(!currentSong) return;
-  hintsUsed++;
-  hintsEl.textContent=hintsUsed;
-  feedback.textContent=`Hint: Song starts with "${currentSong.title[0]}"`;
-};
-nextBtn.onclick=()=>{
-  round++;
-  pickSong();
-};
-genreSelect.onchange=pickSong;
-difficultySelect.onchange=pickSong;
+  playPauseBtn.addEventListener('click', togglePlayPause);
 
-pickSong();
+  // Answer buttons listeners
+  answerButtons.forEach(btn => {
+    btn.addEventListener('click', handleAnswerClick);
+  });
+
+  // Hint buttons listeners
+  hintButtons.forEach(btn => {
+    btn.addEventListener('click', handleHintClick);
+  });
+
+  // Filter buttons listeners
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.filterType;
+      const val = btn.dataset.filterValue;
+
+      // Set filter active
+      filterButtons
+        .filter(b => b.dataset.filterType === type)
+        .forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if(type === 'genre') {
+        selectedGenre = val;
+      } else if(type === 'difficulty') {
+        selectedDifficulty = val;
+      }
+      // Reset round, score, streak on filter change
+      currentRound = 1;
+      score = 0;
+      streak = 0;
+      updateStats();
+      pickNewSong();
+    });
+  });
+
+  // Tabs switching (placeholder)
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+        t.tabIndex = -1;
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      tab.tabIndex = 0;
+
+      // If leaderboard tab clicked - just alert for now
+      if(tab.id === 'tab-leaderboard') {
+        alert('Leaderboard coming soon!');
+      }
+    });
+  });
+
+  // Reset everything and start first song
+  pickNewSong();
+  updateStats();
+})();
 </script>
+
 </body>
 </html>
