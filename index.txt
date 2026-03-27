@@ -66,12 +66,6 @@
     </div>
 
     <script>
-      const songs = [
-        { title: "Song One", artist: "Artist A", audioClip: "audio/song1.mp3" },
-        { title: "Song Two", artist: "Artist B", audioClip: "audio/song2.mp3" },
-        { title: "Song Three", artist: "Artist C", audioClip: "audio/song3.mp3" }
-      ];
-
       const audio = document.getElementById("audio");
       const playBtn = document.getElementById("playBtn");
       const submitBtn = document.getElementById("submitBtn");
@@ -82,6 +76,7 @@
       const roundEl = document.getElementById("round");
       const scoreEl = document.getElementById("score");
 
+      let songs = [];
       let currentSong = null;
       let round = 1;
       let score = 0;
@@ -90,16 +85,35 @@
         return str.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
       }
 
+      async function loadSongs() {
+        const res = await fetch("https://itunes.apple.com/search?term=disney&entity=song&limit=25");
+        const data = await res.json();
+
+        songs = data.results
+          .filter(s => s.previewUrl)
+          .map(s => ({
+            title: s.trackName,
+            artist: s.artistName,
+            audioClip: s.previewUrl
+          }));
+
+        pickSong();
+      }
+
       function pickSong() {
+        if (!songs.length) return;
+
         currentSong = songs[Math.floor(Math.random() * songs.length)];
         audio.src = currentSong.audioClip;
+        audio.load();
+
         feedback.textContent = "";
         guessInput.value = "";
       }
 
       playBtn.onclick = () => {
         audio.currentTime = 0;
-        audio.play();
+        audio.play().catch(err => console.error("Play failed:", err));
       };
 
       submitBtn.onclick = () => {
@@ -125,7 +139,8 @@
         pickSong();
       };
 
-      pickSong();
+      // Start app
+      loadSongs();
     </script>
   </body>
 </html>
